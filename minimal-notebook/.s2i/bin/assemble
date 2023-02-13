@@ -9,7 +9,7 @@ set -eo pipefail
 ########################################################################
 
 # Ensure we are using the latest pip and wheel packages.
-
+pip install --upgrade pip
 pip install -U pip setuptools wheel
 
 # Install mod_wsgi for use in optional webdav support.
@@ -23,6 +23,7 @@ pip install 'supervisor==4.1.0'
 # Install base packages needed for running Jupyter Notebooks. 
 
 pip install -r /tmp/src/requirements.txt
+pip list --outdated --format=freeze | grep -v '^\-e' | cut -d = -f 1 | xargs -n1 pip install -U 
 
 npm cache clean --force
 
@@ -55,25 +56,25 @@ mv /tmp/src/*.sh /opt/app-root/bin
 
 # Install oc command line client for OpenShift cluster.
 
-curl -s -o /tmp/oc.tar.gz https://mirror.openshift.com/pub/openshift-v3/clients/3.11.153/linux/oc.tar.gz && \
-    tar -C /opt/app-root/bin -zxf /tmp/oc.tar.gz oc && \
-    mv /opt/app-root/bin/oc /opt/app-root/bin/oc-3.11 && \
-    rm /tmp/oc.tar.gz
+#curl -s -o /tmp/oc.tar.gz https://mirror.openshift.com/pub/openshift-v3/clients/3.11.153/linux/oc.tar.gz && \
+#    tar -C /opt/app-root/bin -zxf /tmp/oc.tar.gz oc && \
+#    mv /opt/app-root/bin/oc /opt/app-root/bin/oc-3.11 && \
+#    rm /tmp/oc.tar.gz
 
-curl -s -o /tmp/oc.tar.gz https://mirror.openshift.com/pub/openshift-v3/clients/4.0.22/linux/oc.tar.gz && \
-    tar -C /opt/app-root/bin -zxf /tmp/oc.tar.gz oc && \
-    mv /opt/app-root/bin/oc /opt/app-root/bin/oc-4.0 && \
-    rm /tmp/oc.tar.gz
+#curl -s -o /tmp/oc.tar.gz https://mirror.openshift.com/pub/openshift-v3/clients/4.0.22/linux/oc.tar.gz && \
+#    tar -C /opt/app-root/bin -zxf /tmp/oc.tar.gz oc && \
+#    mv /opt/app-root/bin/oc /opt/app-root/bin/oc-4.0 && \
+#    rm /tmp/oc.tar.gz
 
-curl -s -o /tmp/oc.tar.gz https://mirror.openshift.com/pub/openshift-v4/clients/oc/4.1/linux/oc.tar.gz && \
-    tar -C /opt/app-root/bin -zxf /tmp/oc.tar.gz oc && \
-    mv /opt/app-root/bin/oc /opt/app-root/bin/oc-4.1 && \
-    rm /tmp/oc.tar.gz
+#curl -s -o /tmp/oc.tar.gz https://mirror.openshift.com/pub/openshift-v4/clients/oc/4.1/linux/oc.tar.gz && \
+#    tar -C /opt/app-root/bin -zxf /tmp/oc.tar.gz oc && \
+#    mv /opt/app-root/bin/oc /opt/app-root/bin/oc-4.1 && \
+#    rm /tmp/oc.tar.gz
 
-curl -s -o /tmp/oc.tar.gz https://mirror.openshift.com/pub/openshift-v4/clients/oc/4.2/linux/oc.tar.gz && \
-    tar -C /opt/app-root/bin -zxf /tmp/oc.tar.gz oc && \
-    mv /opt/app-root/bin/oc /opt/app-root/bin/oc-4.2 && \
-    rm /tmp/oc.tar.gz
+#curl -s -o /tmp/oc.tar.gz https://mirror.openshift.com/pub/openshift-v4/clients/oc/4.2/linux/oc.tar.gz && \
+#    tar -C /opt/app-root/bin -zxf /tmp/oc.tar.gz oc && \
+#    mv /opt/app-root/bin/oc /opt/app-root/bin/oc-4.2 && \
+#    rm /tmp/oc.tar.gz
 
 curl -s -o /tmp/oc.tar.gz https://mirror.openshift.com/pub/openshift-v4/clients/oc/4.3/linux/oc.tar.gz && \
     tar -C /opt/app-root/bin -zxf /tmp/oc.tar.gz oc && \
@@ -118,6 +119,25 @@ EOF
 # produced to run further S2I builds.
 
 rm -rf /tmp/src
+
+curl https://bootstrap.pypa.io/get-pip.py > get-pip.py
+python2 get-pip.py
+rm -f get-pip.py
+python2 -m pip install ipykernel arrow pyarrow pytest networkx
+python2 -m ipykernel install --user
+pip install jupyter_contrib_nbextensions
+pip list --outdated --format=freeze | grep -v '^\-e' | cut -d = -f 1 | xargs -n1 pip install -U
+
+mkdir .virtual
+virtualenv -p python3 .virtual/livy
+source .virtual/livy/bin/activate
+pip install ipykernel
+python -m ipykernel install --user --name livy --display-name "Python 3(livy)"
+pip install -U livy arrow pyarrow pytest prospector networkx
+pip list --outdated --format=freeze | grep -v '^\-e' | cut -d = -f 1 | xargs -n1 pip install -U
+
+
+
 
 # Fixup permissions on directories and files.
 

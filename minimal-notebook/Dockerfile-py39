@@ -1,4 +1,4 @@
-FROM centos/python-36-centos7:latest
+FROM registry.redhat.io/rhel8/python-39:1-73
 
 USER root
 
@@ -14,10 +14,10 @@ RUN rm -rf /tmp/src/.git* && \
 USER 1001
 
 LABEL io.k8s.description="S2I builder for custom Jupyter notebooks." \
-      io.k8s.display-name="Jupyter Notebook" \
-      io.openshift.expose-services="8080:http" \
-      io.openshift.tags="builder,jupyter" \
-      io.openshift.s2i.scripts-url="image:///opt/app-root/builder"
+    io.k8s.display-name="Jupyter Notebook" \
+    io.openshift.expose-services="8080:http" \
+    io.openshift.tags="builder,jupyter" \
+    io.openshift.s2i.scripts-url="image:///opt/app-root/builder"
 
 RUN /tmp/scripts/assemble
 
